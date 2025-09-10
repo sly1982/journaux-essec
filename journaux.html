@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrix Code Lock</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+    }
+
+    h1 {
+      margin: 20px 0;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+
+    .digits {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      width: 90%;
+      max-width: 400px;
+      margin-top: 30px;
+    }
+
+    .digit {
+      background: rgba(0, 255, 0, 0.1);
+      border: 1px solid #0f0;
+      color: #0f0;
+      font-size: 1.5em;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .digit:hover {
+      background: rgba(0, 255, 0, 0.3);
+    }
+
+    .result {
+      margin-top: 20px;
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+
+    .good {
+      color: limegreen;
+    }
+
+    .wrong {
+      color: red;
+    }
+
+    .retry-btn {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: #222;
+      border: 1px solid #0f0;
+      border-radius: 6px;
+      color: #0f0;
+      font-size: 1em;
+      cursor: pointer;
+      display: none;
+    }
+
+    .retry-btn:hover {
+      background: #0f0;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <h1>Enlighten. Lead. Change.</h1>
+  <canvas id="matrix"></canvas>
+
+  <div class="digits" id="digits"></div>
+  <div class="result" id="result"></div>
+  <button class="retry-btn" id="retry">Retry</button>
+
+  <script>
+    // MATRIX BACKGROUND
+    const canvas = document.getElementById("matrix");
+    const ctx = canvas.getContext("2d");
+
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+
+    const letters = "01";
+    const fontSize = 14;
+    const columns = canvas.width / fontSize;
+
+    const drops = [];
+    for (let x = 0; x < columns; x++) {
+      drops[x] = 1;
+    }
+
+    function draw() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#0f0";
+      ctx.font = fontSize + "px arial";
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters.charAt(Math.floor(Math.random() * letters.length));
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+
+    setInterval(draw, 35);
+
+    // CODE LOCK
+    const goodCode = [5, 2, 6];
+    let enteredCode = [];
+
+    const digitsContainer = document.getElementById("digits");
+    const resultDiv = document.getElementById("result");
+    const retryBtn = document.getElementById("retry");
+
+    // Create digit buttons
+    for (let i = 0; i <= 9; i++) {
+      const btn = document.createElement("div");
+      btn.classList.add("digit");
+      btn.textContent = i;
+      btn.onclick = () => enterDigit(i);
+      digitsContainer.appendChild(btn);
+    }
+
+    function enterDigit(num) {
+      enteredCode.push(num);
+
+      if (enteredCode.length === goodCode.length) {
+        if (enteredCode.every((val, idx) => val === goodCode[idx])) {
+          resultDiv.textContent = "GOOD ANSWER";
+          resultDiv.className = "result good";
+        } else {
+          resultDiv.textContent = "WRONG";
+          resultDiv.className = "result wrong";
+        }
+        retryBtn.style.display = "inline-block"; // show retry
+      }
+    }
+
+    retryBtn.onclick = () => {
+      enteredCode = [];
+      resultDiv.textContent = "";
+      retryBtn.style.display = "none";
+    };
+
+    window.addEventListener("resize", () => {
+      canvas.height = window.innerHeight;
+      canvas.width = window.innerWidth;
+    });
+  </script>
+</body>
+</html>
